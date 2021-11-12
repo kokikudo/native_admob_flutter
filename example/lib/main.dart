@@ -6,24 +6,20 @@ import 'screens/full_screen_ads.dart';
 import 'screens/banner_ads.dart';
 
 void main() async {
-  /// Make sure you add this line here, so the plugin can access the native side
+  // プラグインをネイティブ側でアクセスできるようにする
   WidgetsFlutterBinding.ensureInitialized();
 
-  /// Make sure to initialize the MobileAds sdk. It returns a future
-  /// that will be completed as soon as it initializes
+  // MobileAdsSDK　初期化
   await MobileAds.initialize();
-  // This is my device id. Ad yours here
+  // テストする端末のデバイスID
   MobileAds.setTestDeviceIds(['9345804C1E5B8F0871DFE29CA0758842']);
 
-  /// Run the app
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    // appOpenAd.show();
     return MaterialApp(
       title: 'Native Ads Example',
       theme: ThemeData(
@@ -44,29 +40,35 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  /// Init the controller
+  // bannerController 初期化
   final bannerController = BannerAdController();
 
-  /// The banner height
+  // bannerの高さ
   // double _bannerAdHeight = 0;
 
   @override
   void initState() {
     super.initState();
+    // Stateの初期化時にリスナーを定義
     bannerController.onEvent.listen((e) {
+      // Map型のデータが返ってくる
+      // キーの初めがイベントの種類らしい（詳しく書いてない）
       final event = e.keys.first;
       // final info = e.values.first;
       switch (event) {
         case BannerAdEvent.loaded:
+          //おそらくロード完了時にバナーのデフォルトの高さが取得できるので変数に入れてる
           // setState(() => _bannerAdHeight = (info as int)?.toDouble());
           break;
         default:
           break;
       }
     });
+    // コントローラーのロード
     bannerController.load();
   }
 
+  // Widgetが破棄されたらコントローラーも破棄する
   @override
   void dispose() {
     bannerController.dispose();
@@ -75,6 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // タブコントローラー。TabBarViewと同じ長さ。
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -99,21 +102,16 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           children: [
             Expanded(
+              // 各Tabに割り当てるView
+              // タブを変えると、この部分だけ切り替わる
               child: TabBarView(
                 children: [NativeAds(), BannerAds(), FullScreenAds()],
               ),
             ),
 
-            /// Here's an example of how you can use a BannerAd in the
-            /// bottom of the screen and above the navigation bar,
-            /// since it's the recommended way. You can move this widget
-            /// to the top of the list ([]) to use it in the top.
-            /// Make sure to use the adaptive banner size (default) to
-            /// the banner ad fit the best
-            ///
-            /// Sometimes an banner ad can have a black background, that's
-            /// expected. Make sure to add an opaque background to your banner
-            /// ad (using builder or whatever)
+            // バナー広告。コントローラーを渡す。
+            // サイズの指定がなければデフォルトのサイズになる
+            // デフォルトなので背景が黒くなる場合があるので、嫌なら背景を透明にする
             BannerAd(controller: bannerController),
           ],
         ),

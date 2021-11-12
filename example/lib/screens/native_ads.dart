@@ -10,15 +10,23 @@ class NativeAds extends StatefulWidget {
 
 class _NativeAdsState extends State<NativeAds>
     with AutomaticKeepAliveClientMixin {
+  //
   Widget? child;
 
+  //
   final controller = NativeAdController();
 
   @override
   void initState() {
     super.initState();
+
+    // ロード。keywordsが何かはわからない。
     controller.load(keywords: ['valorant', 'games', 'fortnite']);
+
+    // リスナー定義
     controller.onEvent.listen((event) {
+      // ロードしたらNativeAdの構成要素を出力
+      // controllerのなかに広告の内容が入っている
       if (event.keys.first == NativeAdEvent.loaded) {
         printAdDetails(controller);
       }
@@ -26,9 +34,8 @@ class _NativeAdsState extends State<NativeAds>
     });
   }
 
+  // 広告の各要素を出力
   void printAdDetails(NativeAdController controller) async {
-    /// Just for showcasing the ability to access
-    /// NativeAd's details via its controller.
     print("------- NATIVE AD DETAILS: -------");
     print(controller.headline);
     print(controller.body);
@@ -49,30 +56,43 @@ class _NativeAdsState extends State<NativeAds>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    if (child != null) return child!;
+    if (child != null)
+      return child!; // 以下のコードでchildにWidgetを代入しているので再Build時に表示する
+
+    // 更新インジケーター
+    // ユーザーの操作等で更新した時の処理をそれぞれ定義
     return RefreshIndicator(
+      // 更新時に少しの間SizeBoxを表示したのちに今の画面を再表示
       onRefresh: () async {
         setState(() => child = SizedBox());
         // await controller.load(force: true);
         await Future.delayed(Duration(milliseconds: 20));
         setState(() => child = null);
       },
+      // メインコンテンツ
       child: ListView(padding: EdgeInsets.all(10), children: [
+        // ロード完了後に表示される広告
         if (controller.isLoaded)
           NativeAd(
             controller: controller,
+            // 高さの指定。横はいらない？
             height: 60,
+            // 広告そのものを装飾するときはbuilerのchildに広告が入るのでそれを使う
             builder: (context, child) {
               return Material(
                 elevation: 8,
                 child: child,
               );
             },
+            // 用意されているレイアウトを指定
+            //　自分でカスタムしたレイアウトも使うことができる
             buildLayout: adBannerLayoutBuilder,
             loading: Text('loading'),
             error: Text('error'),
+            // 各要素は AdImageViewで定義する
             icon: AdImageView(padding: EdgeInsets.only(left: 6)),
             headline: AdTextView(style: TextStyle(color: Colors.black)),
+            // 広告主
             advertiser: AdTextView(style: TextStyle(color: Colors.black)),
             body:
                 AdTextView(style: TextStyle(color: Colors.black), maxLines: 1),
@@ -85,6 +105,7 @@ class _NativeAdsState extends State<NativeAds>
             ),
           ),
         SizedBox(height: 10),
+        // リスナーが不要であればコントローラーを指定せずに普通に描写できる
         NativeAd(
           height: 115,
           builder: (context, child) {
@@ -113,6 +134,7 @@ class _NativeAdsState extends State<NativeAds>
             decoration: AdDecoration(backgroundColor: Colors.blue),
             textStyle: TextStyle(color: Colors.white),
           ),
+          // ADマーク
           attribution: AdTextView(
             width: WRAP_CONTENT,
             text: 'Ad',
@@ -127,6 +149,7 @@ class _NativeAdsState extends State<NativeAds>
         SizedBox(height: 10),
         NativeAd(
           height: 320,
+          // MobileAdsで登録した広告ユニットID
           unitId: MobileAds.nativeAdVideoTestUnitId,
           builder: (context, child) {
             return Material(
@@ -179,6 +202,7 @@ class _NativeAdsState extends State<NativeAds>
               child: child,
             );
           },
+          // 自作レイアウト（下にあるコード）を指定
           buildLayout: secondBuilder,
           loading: Text('loading'),
           error: Text('error'),
@@ -248,6 +272,7 @@ class _NativeAdsState extends State<NativeAds>
     );
   }
 
+  // インスタンスを保持させる
   @override
   bool get wantKeepAlive => true;
 }

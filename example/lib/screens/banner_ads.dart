@@ -27,6 +27,7 @@ class _BannerAdsState extends State<BannerAds>
         children: [
           BannerAd(
             builder: (context, child) {
+              // バナーの場合はContainerで包む
               return Container(
                 color: Colors.black,
                 child: child,
@@ -34,6 +35,7 @@ class _BannerAdsState extends State<BannerAds>
             },
             loading: Text('loading'),
             error: Text('error'),
+            // サイズ指定。デフォルトはADAPTIVE
             size: BannerSize.ADAPTIVE,
           ),
           SizedBox(height: 10),
